@@ -1,12 +1,16 @@
 import { match, MatchResult, MatchResultParams } from './match';
 export { match, MatchResult, MatchResultParams };
 
+export interface Html5RoutingOptions {
+  appendQueryParams?: boolean;
+}
 
 namespace dom {
   /** Serverside safe document.location */
   const dloc = typeof document !== 'undefined' ? document.location : { hash: '' };
 
   export let html5Base: null | string = null;
+  export let html5RoutingOptions: Html5RoutingOptions | undefined = {};
   export function html5ModeEnabled() {
     return html5Base !== null;
   }
@@ -150,8 +154,9 @@ export class Router {
    * - Server must support returning the same page on route triggers.
    * - Your browser targets support pushState: https://caniuse.com/#search=pushstate
    */
-  enableHtml5Routing(baseUrl: string = '') {
+  enableHtml5Routing(baseUrl: string = '', options?: Html5RoutingOptions) {
     dom.html5Base = baseUrl;
+    dom.html5RoutingOptions = options;
     return this;
   }
 
@@ -222,8 +227,12 @@ export class Router {
  * Navigates to the given path
  */
 export function navigate(path: string, replace?: boolean) {
+  const queryParams = dom.html5RoutingOptions && dom.html5RoutingOptions.appendQueryParams 
+    ? window.location.search 
+    : '';
+
   dom.html5ModeEnabled()
-    ? dom.setLocation(`${dom.html5Base}${path}`, !!replace)
+    ? dom.setLocation(`${dom.html5Base}${path}${queryParams}`, !!replace)
     : dom.setLocation(`#${path}`, !!replace);
 }
 
