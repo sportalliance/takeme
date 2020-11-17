@@ -1,12 +1,17 @@
 import { match, MatchResult, MatchResultParams } from './match';
 export { match, MatchResult, MatchResultParams };
 
+export interface Html5RoutingOptions {
+  baseUrl?: string;
+  appendQueryParams?: boolean;
+}
 
 namespace dom {
   /** Serverside safe document.location */
   const dloc = typeof document !== 'undefined' ? document.location : { hash: '' };
 
   export let html5Base: null | string = null;
+  export let html5RoutingOptions: Html5RoutingOptions | undefined = {};
   export function html5ModeEnabled() {
     return html5Base !== null;
   }
@@ -150,8 +155,13 @@ export class Router {
    * - Server must support returning the same page on route triggers.
    * - Your browser targets support pushState: https://caniuse.com/#search=pushstate
    */
-  enableHtml5Routing(baseUrl: string = '') {
-    dom.html5Base = baseUrl;
+  enableHtml5Routing(baseUrlOrOptions: string | Html5RoutingOptions = '') {
+    if(typeof baseUrlOrOptions === 'string') {
+      dom.html5Base = baseUrlOrOptions;
+    } else {
+      dom.html5Base = baseUrlOrOptions.baseUrl || null;
+      dom.html5RoutingOptions = baseUrlOrOptions;
+    }
     return this;
   }
 
@@ -218,12 +228,21 @@ export class Router {
   }
 }
 
+function transformHtml5Path(path: string) {
+  const {hash, search} = window.location;
+  return dom.html5RoutingOptions && dom.html5RoutingOptions.appendQueryParams 
+    ? `${path.replace(/\?(.*)/, '')}${search}${hash}`
+    : path;
+}
+
 /**
  * Navigates to the given path
  */
 export function navigate(path: string, replace?: boolean) {
+  const html5Path = transformHtml5Path(path);
+
   dom.html5ModeEnabled()
-    ? dom.setLocation(`${dom.html5Base}${path}`, !!replace)
+    ? dom.setLocation(`${dom.html5Base}${html5Path}`, !!replace)
     : dom.setLocation(`#${path}`, !!replace);
 }
 
@@ -231,8 +250,10 @@ export function navigate(path: string, replace?: boolean) {
  * Gives you a link that when triggered, navigates to the given path
  */
 export function link(path: string) {
+  const html5Path = transformHtml5Path(path);
+
   return dom.html5ModeEnabled()
-    ? `${dom.html5Base!}${path}`
+    ? `${dom.html5Base!}${html5Path}`
     /** 
      * Needs `./` to prevent accessibility error `link refers to non existing element`
      * 
