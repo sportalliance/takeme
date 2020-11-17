@@ -159,7 +159,7 @@ export class Router {
     if(typeof baseUrlOrOptions === 'string') {
       dom.html5Base = baseUrlOrOptions;
     } else {
-      dom.html5Base = baseUrlOrOptions.baseUrl || null;
+      dom.html5Base = baseUrlOrOptions.baseUrl === undefined ? '' : baseUrlOrOptions.baseUrl;
       dom.html5RoutingOptions = baseUrlOrOptions;
     }
     return this;
