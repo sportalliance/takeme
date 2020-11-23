@@ -41,7 +41,7 @@ namespace dom {
    * Used to track the last value set.
    * if it does not change we ignore events
    */
-  let oldLocation = readLocation();
+  export let oldLocation = readLocation();
 
   export function setLocation(location: string, replace: boolean) {
     if (readLocation() === location) return;
@@ -146,6 +146,8 @@ export class Router {
    * Runs through the config and triggers an routes that matches the current path
    */
   init() {
+    dom.oldLocation = dom.readLocation();
+    
     return this.trigger({ oldLocation: '', newLocation: dom.readLocation() });
   }
 
