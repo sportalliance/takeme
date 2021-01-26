@@ -50,6 +50,7 @@ export declare class Router {
      * Runs through the config and triggers an routes that matches the current path
      */
     init(): Promise<void>;
+    destroy(): void;
     /**
      * Enables pure html5 routing.
      * NOTE:

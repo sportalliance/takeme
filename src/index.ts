@@ -86,6 +86,10 @@ namespace dom {
       listeners = listeners.filter(l => l !== cb);
     }
   }
+
+  export function unlisten() {
+    listeners = [];
+  }
 }
 
 export interface RouteChangeEvent {
@@ -149,6 +153,10 @@ export class Router {
     dom.oldLocation = dom.readLocation();
     
     return this.trigger({ oldLocation: '', newLocation: dom.readLocation() });
+  }
+
+  destroy() {
+    dom.unlisten();
   }
 
   /**
