@@ -8,7 +8,7 @@ export interface Html5RoutingOptions {
 
 namespace dom {
   /** Serverside safe document.location */
-  const dloc = typeof document !== 'undefined' ? document.location : { hash: '' };
+  export const dloc = typeof document !== 'undefined' ? document.location : { hash: '', pathname: '', search: '' };
 
   export let html5Base: null | string = null;
   export let html5RoutingOptions: Html5RoutingOptions | undefined = {};
@@ -33,7 +33,7 @@ namespace dom {
       return hash;
     }
     else {
-      return window.location.pathname.substr(html5Base.length);
+      return dloc.pathname.substr(html5Base.length);
     }
   }
 
@@ -46,7 +46,7 @@ namespace dom {
   export function setLocation(location: string, replace: boolean) {
     if (readLocation() === location) return;
 
-    if (typeof history !== 'undefined' && history.pushState) {
+    if (typeof history !== 'undefined' && history && history.pushState) {
       if (replace) {
         history.replaceState({}, document.title, location)
       }
@@ -75,7 +75,7 @@ namespace dom {
     oldLocation = newLocation;
   };
 
-  if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && window) {
     window.addEventListener('hashchange', fire, false);
     window.addEventListener('popstate', fire);
   }
@@ -239,7 +239,7 @@ export class Router {
 }
 
 function transformHtml5Path(path: string) {
-  const {hash, search} = window.location;
+  const {hash, search} = dom.dloc;
   return dom.html5RoutingOptions && dom.html5RoutingOptions.appendQueryParams 
     ? `${path.replace(/\?(.*)/, '')}${search}${hash}`
     : path;
